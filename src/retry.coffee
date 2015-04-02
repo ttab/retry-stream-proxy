@@ -1,8 +1,8 @@
-Q        = require 'q'
+merge = require './merge'
+Q     = require 'q'
 
-extend = (a, b) ->
-    a[k] = v for own k, v of b
-    return a
+# Error that indicates we want to abort
+class AbortError extends Error then constructor: -> super
 
 module.exports = class Retry
 
@@ -13,7 +13,7 @@ module.exports = class Retry
     defaultDelay: 1000
 
     constructor: (options) ->
-        extend this, options
+        merge this, options
 
     delay: (attempt, delay) ->
         @min + Math.floor(delay * Math.pow(@base, Math.min(@exp, attempt)) +
@@ -41,7 +41,7 @@ module.exports = class Retry
                     return if firstError
                     firstError = true
                     lastErr = err
-                    if err == Retry.ABORT
+                    if err instanceof AbortError
                         reject err
                     else if (delay = _this.delay attempt, delay) >= 0
                         setTimeout (-> tryAgain attempt + 1), delay
@@ -52,8 +52,5 @@ module.exports = class Retry
                 p.then ((v) -> resolve v), onErr
             null
 
-# rejection value to abort retries
-Retry.ABORT = new Error("Aborted")
-
 # helper function to abort retries
-Retry.abort = -> Q.reject Retry.ABORT
+Retry.abort = (reason) -> Q.reject new AbortError(reason)
