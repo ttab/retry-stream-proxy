@@ -1,0 +1,34 @@
+{
+  "name": "retry-stream-proxy",
+  "version": "0.0.1",
+  "description": "Node stream proxy with retry on error in originating stream",
+  "main": "lib/proxy.js",
+  "scripts": {
+    "test": "mocha",
+    "compile": "coffee -o lib -c src"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ttab/retry-stream-proxy"
+  },
+  "keywords": [
+    "stream",
+    "proxy",
+    "retry",
+    "resilient"
+  ],
+  "author": "Martin Algesten <martin@algesten.se>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/ttab/retry-stream-proxy/issues"
+  },
+  "homepage": "https://github.com/ttab/retry-stream-proxy",
+  "dependencies": {
+    "q": "^1.2.0"
+  },
+  "devDependencies": {
+    "chai": "^2.2.0",
+    "coffee-script": "^1.9.1",
+    "mocha": "^2.2.1"
+  }
+}
