@@ -75,14 +75,23 @@ readFrom = (proxy) ->
             proxy.push null
             resolve()
 
+        stop = null
+
+        attach = (src) ->
+            stop = ->
+                src.removeListener 'data',  onData
+                src.removeListener 'error', onError
+                src.removeListener 'end',   onEnd
+
+            src.on 'data',  onData
+            src.on 'error', onError
+            src.on 'end',   onEnd
+
         # create a new origin stream
         src = proxy.origin()
 
-        stop = ->
-            src.removeListener 'data',  onData
-            src.removeListener 'error', onError
-            src.removeListener 'end',   onEnd
-
-        src.on 'data',  onData
-        src.on 'error', onError
-        src.on 'end',   onEnd
+        # origin can be a promise for a stream
+        if typeof src.then == 'function'
+            src.then (src) -> attach(src)
+        else
+            attach(src)

@@ -85,7 +85,6 @@ describe 'proxy', ->
             eql count, 5
 
 
-
     it 'retries ok if error is before previous successful position', ->
         errpos = [10, 4]
         proxy = new Proxy (-> inp = new TestReadable test, 4, errpos.shift())
@@ -103,3 +102,12 @@ describe 'proxy', ->
             eql err.message, 'Deliberate fail'
             done()
         proxy.pipe out
+
+
+    it 'allows source to be a promise for a stream', ->
+        proxy = new Proxy -> Q inp = new TestReadable test, 3
+        proxy.pipe out
+        out.promise.then ->
+            assert.isNotNull inp
+            eql out.buf, test
+            eql count, 1
