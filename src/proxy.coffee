@@ -48,9 +48,14 @@ readFrom = (proxy) ->
 
     -> Q.Promise (resolve, reject) ->
 
+        # not start new one
+        return reject(proxy.abort) if proxy.abort
+
         # how far this specific readable is into the origin
         cur = 0
         onData = (chunk) ->
+            # lingering abort?
+            return proxy.emit 'error', proxy.abort if proxy.abort
             if (skip = pos - cur) > 0
                 if skip < chunk.length
                     cur += skip
@@ -78,7 +83,11 @@ readFrom = (proxy) ->
         stop = null
 
         attach = (src) ->
+            # expose on proxy object
+            proxy.src = src
             stop = ->
+                # and unexpose
+                delete proxy.src
                 src.removeListener 'data',  onData
                 src.removeListener 'error', onError
                 src.removeListener 'end',   onEnd
@@ -86,6 +95,11 @@ readFrom = (proxy) ->
             src.on 'data',  onData
             src.on 'error', onError
             src.on 'end',   onEnd
+
+            # lingering abort?
+            proxy.emit 'error', proxy.abort if proxy.abort
+
+
 
         # create a new origin stream
         src = proxy.origin()
@@ -95,3 +109,9 @@ readFrom = (proxy) ->
             src.then (src) -> attach(src)
         else
             attach(src)
+
+
+# Sets an abort value on the given proxy
+Proxy.abort = (proxy, message) ->
+    proxy.abort = Retry.abort message
+    proxy.emit? 'error', proxy.abort
