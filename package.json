@@ -1,6 +1,6 @@
 {
   "name": "retry-stream-proxy",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Node stream proxy with retry on error in originating stream",
   "main": "lib/proxy.js",
   "scripts": {
