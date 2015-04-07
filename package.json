@@ -5,7 +5,7 @@
   "main": "lib/proxy.js",
   "scripts": {
     "test": "mocha",
-    "compile": "coffee -o lib -c src"
+    "prepublish": "coffee -o lib -c src"
   },
   "repository": {
     "type": "git",
