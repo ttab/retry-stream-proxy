@@ -3,6 +3,7 @@ Retry    = require './retry'
 merge    = require './merge'
 Q        = require 'q'
 
+
 module.exports = class Proxy extends Readable
 
     defaults:
@@ -11,7 +12,7 @@ module.exports = class Proxy extends Readable
             base:         1.2   # exponential base for delay calc
             exp:          33    # max exponent
 
-        max:              3     # max number of retries
+        max:              5     # max number of retries
         delay:            0     # delay between retries
 
     # origin is a callback that creates a readable from upstream
@@ -22,15 +23,22 @@ module.exports = class Proxy extends Readable
         merge this, @defaults, opts
         # and create an instance of Retry
         @retryer = new Retry @retry
-        # deferred for entire operation
-        @def = Q.deferred()
+        # deferred/promise for entire operation
+        @def = Q.defer()
+        @promise = @def.promise
 
     _read: ->
         unless @waitFor
             @waitFor = @retryer.try @max, @delay, readFrom(this)
-            @waitFor.then (=> @def.resolve()), ((err) => @def.reject(err))
-
-    promise: -> @def.promise
+            @waitFor.then =>
+                @def.resolve()
+            .fail (err) =>
+                try
+                    @emit 'error', err
+                catch err
+                    console.log 'No error handler for proxy', err
+                @def.reject(err)
+            .done()
 
 
 readFrom = (proxy) ->
@@ -50,6 +58,7 @@ readFrom = (proxy) ->
                 else
                     cur += chunk.length
                     chunk = null
+            more = true
             if chunk?.length
                 more = proxy.push chunk
                 pos = cur += chunk.length
