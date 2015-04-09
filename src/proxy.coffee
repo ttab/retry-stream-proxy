@@ -65,12 +65,9 @@ readFrom = (proxy) ->
                     chunk = null
             more = true
             if chunk?.length
-                more = proxy.push chunk
+                # blatantly ignoring the backpressure
+                proxy.push chunk
                 pos = cur += chunk.length
-            unless more
-                # what to do?!
-                stop()
-                Retry.abort "No more pushing?!"
 
         onError = (err) ->
             stop()
