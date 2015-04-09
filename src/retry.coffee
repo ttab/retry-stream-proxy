@@ -2,7 +2,7 @@ merge = require './merge'
 Q     = require 'q'
 
 # Error that indicates we want to abort
-class AbortError extends Error then constructor: -> super
+class AbortError extends Error then constructor: (@message) -> super
 
 module.exports = class Retry
 
@@ -53,4 +53,4 @@ module.exports = class Retry
             null
 
 # helper function to abort retries
-Retry.abort = (reason) -> Q.reject new AbortError(reason)
+Retry.abort = (reason) -> new AbortError(reason)
